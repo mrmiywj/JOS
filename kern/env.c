@@ -374,10 +374,10 @@ load_icode(struct Env *e, uint8_t *binary)
 			memset((void*)ph->p_va + ph->p_filesz,0,ph->p_memsz - ph->p_filesz);
 		}
 	}
-	e->env_tf.tf_eip = elfhdr->e_entry;
 	// Now map one page for the program's initial stack
 	// at virtual address USTACKTOP - PGSIZE.
 	lcr3(PADDR(kern_pgdir));
+	e->env_tf.tf_eip = elfhdr->e_entry;
 	// LAB 3: Your code here.
 	region_alloc(e,(void*)USTACKTOP-PGSIZE,PGSIZE);
 }
@@ -519,8 +519,8 @@ env_run(struct Env *e)
 		curenv->env_status = ENV_RUNNABLE;
 	}
 	curenv = e;
-	curenv->env_status = ENV_RUNNING;
-	curenv->env_runs++;
+	e->env_status = ENV_RUNNING;
+	e->env_runs++;
 	lcr3(PADDR(curenv->env_pgdir));
 	//panic("env_run not yet implemented");
 

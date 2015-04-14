@@ -95,6 +95,14 @@ trap_init(void)
     SETGATE(idt[14], 0, GD_KT, th14, 0);
     SETGATE(idt[16], 0, GD_KT, th16, 0);
     SETGATE(idt[48], 0, GD_KT, th48, 3);
+
+    ts.ts_esp0 = KSTACKTOP;
+    ts.ts_ss0 = GD_KD;
+
+    gdt[GD_TSS0 >> 3] = SEG16(STS_T32A, (uint32_t) (&ts), sizeof(struct Taskstate), 0);
+    gdt[GD_TSS0 >> 3].sd_s = 0;
+
+    ltr(GD_TSS0);
 	// Per-CPU setup 
 	trap_init_percpu();
 }

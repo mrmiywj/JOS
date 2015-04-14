@@ -86,15 +86,11 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 		sys_env_destroy(a1);
 		ret = 0;
 		break;
-	default:
-		ret = -E_INVAL;
-	}
-	return ret;
-	panic("syscall not implemented");
+	//panic("syscall not implemented");
 
-	switch (syscallno) {
 	default:
 		return -E_NO_SYS;
 	}
+	return ret;
 }
 
