@@ -72,7 +72,30 @@ trap_init(void)
 	extern struct Segdesc gdt[];
 
 	// LAB 3: Your code here.
+    extern uint32_t idt_entries[];
+    int i = 0;
+    for (i = 0; i < 256; i++)
+    {
+        switch(i)
+        {
+            case T_BRKPT:
+            case T_SYSCALL:
+                    SETGATE(idt[i], 0, GD_KT, idt_entries[i], 3);
+                    break;
 
+            default:
+                    SETGATE(idt[i], 0, GD_KT, idt_entries[i], 0);
+                    break;
+        }
+    }
+
+    ts.ts_esp0 = KSTACKTOP;
+    ts.ts_ss0  = GD_KD;
+
+    gdt[GD_TSS0 >> 3] = SEG16(STS_T32A, (uint32_t) (&ts), sizeof(struct Taskstate), 0);
+    gdt[GD_TSS0 >> 3].sd_s = 0;
+
+    ltr(GD_TSS0);
 	// Per-CPU setup 
 	trap_init_percpu();
 }
@@ -174,6 +197,7 @@ trap_dispatch(struct Trapframe *tf)
 	// Handle processor exceptions.
 	// LAB 3: Your code here.
 
+
 	// Handle spurious interrupts
 	// The hardware sometimes raises these because of noise on the
 	// IRQ line or other reasons. We don't care.
@@ -182,7 +206,25 @@ trap_dispatch(struct Trapframe *tf)
 		print_trapframe(tf);
 		return;
 	}
+	switch(tf->tf_trapno)
+	{
+    case T_PGFLT:
+            page_fault_handler(tf);
+            return;
+    case T_BRKPT:
+            monitor(tf);
+            return;
 
+    case T_SYSCALL:
+            tf->tf_regs.reg_eax = syscall(tf->tf_regs.reg_eax,
+                        tf->tf_regs.reg_edx,
+                        tf->tf_regs.reg_ecx,
+                        tf->tf_regs.reg_ebx,
+                        tf->tf_regs.reg_edi,
+                        tf->tf_regs.reg_esi);
+            return ;
+
+}
 	// Handle clock interrupts. Don't forget to acknowledge the
 	// interrupt using lapic_eoi() before calling the scheduler!
 	// LAB 4: Your code here.
@@ -269,6 +311,10 @@ page_fault_handler(struct Trapframe *tf)
 
 	// LAB 3: Your code here.
 
+    if ((tf->tf_cs & 3) == 0)
+    {
+        panic("Page fault in kernel");
+    }
 	// We've already handled kernel-mode exceptions, so if we get here,
 	// the page fault happened in user mode.
 

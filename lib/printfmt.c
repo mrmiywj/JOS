@@ -90,6 +90,8 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 	int base, lflag, width, precision, altflag;
 	char padc;
 
+    int Color = 0;// EOF added
+
 	while (1) {
 		while ((ch = *(unsigned char *) fmt++) != '%') {
 			if (ch == '\0')
@@ -159,8 +161,31 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 		// character
 		case 'c':
-			putch(va_arg(ap, int), putdat);
+            /*
+             * EOF added
+             */
+            ch = va_arg(ap, int) + Color;
+			putch(ch, putdat);
+            Color = 0;
+
 			break;
+
+        case 'C':
+            switch(va_arg(ap, int))
+            {
+                case COLOR_RED:
+                    Color = COLOR_RED<<8;
+                    break;
+
+                case COLOR_GRN:
+                    Color = COLOR_GRN<<8;
+                    break;
+
+                default:
+                    Color = 0;
+            }
+
+            goto reswitch;
 
 		// error message
 		case 'e':
@@ -208,10 +233,9 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		// (unsigned) octal
 		case 'o':
 			// Replace this with your code.
-			putch('X', putdat);
-			putch('X', putdat);
-			putch('X', putdat);
-			break;
+			num = getuint(&ap,lflag);
+			base = 8;
+			goto number;
 
 		// pointer
 		case 'p':
