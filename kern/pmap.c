@@ -348,6 +348,10 @@ page_init(void)
             pages[0].pp_link = NULL;
             continue;
         }
+        else if (i == MPENTRY_PADDR/PGSIZE)
+        {
+        	continue;
+        }
         else if(i < npages_basemem)
         {
             pages[i].pp_ref = 0;
@@ -685,8 +689,8 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// safe to cache access to this memory.  Luckily, the page
 	// tables provide bits for this purpose; simply create the
 	// mapping with PTE_PCD|PTE_PWT (cache-disable and
-	// write-through) in addition to PTE_W.  (If you're interested
-	// in more details on this, see section 10.5 of IA32 volume
+		// write-through) in addition to PTE_W.  (If you're interested
+		// in more details on this, see section 10.5 of IA32 volume
 	// 3A.)
 	//
 	// Be sure to round size up to a multiple of PGSIZE and to
@@ -696,7 +700,15 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	panic("mmio_map_region not implemented");
+	size_t newsize = ROUNDUP(size,PGSIZE);
+	void* ret = (void*)base;
+	if (base + newsize > MMIOLIM || base + newsize <base){
+		panic("mmio_map_region: reservation overflow\n");
+	}
+	boot_map_region(kern_pgdir,base,newsize,pa,(PTE_PCD|PTE_PWT|PTE_P));
+	base += newsize;
+	return ret;
+	//panic("mmio_map_region not implemented");
 }
 
 static uintptr_t user_mem_check_addr;
