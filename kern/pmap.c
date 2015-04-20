@@ -359,9 +359,10 @@ page_init(void)
             pages[0].pp_link = NULL;
             continue;
         }
-        else if (i == MPENTRY_PADDR/PGSIZE)
+        else if (i == PGNUM(MPENTRY_PADDR))
         {
-        	continue;
+        	pages[i].pp_ref = 1;
+        	pages[i].pp_link = NULL;
         }
         else if(i < npages_basemem)
         {
@@ -711,13 +712,13 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	size_t newsize = ROUNDUP(size,PGSIZE);
+	size = ROUNDUP(size,PGSIZE);
 	void* ret = (void*)base;
-	if (base + newsize > MMIOLIM || base + newsize <base){
+	if (base + size > MMIOLIM || base + size <base){
 		panic("mmio_map_region: reservation overflow\n");
 	}
-	boot_map_region(kern_pgdir,base,newsize,pa,(PTE_PCD|PTE_PWT|PTE_P));
-	base += newsize;
+	boot_map_region(kern_pgdir,base,size,pa,(PTE_PCD|PTE_PWT|PTE_W));
+	base += size;
 	return ret;
 	//panic("mmio_map_region not implemented");
 }
