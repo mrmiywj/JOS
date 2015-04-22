@@ -286,6 +286,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
             r = sys_getenvid(); break;
         case SYS_env_destroy: 
             r = sys_env_destroy((envid_t) a1); break;
+        case SYS_yield:
+        	sys_yield();
+        	break;
 
         default:
             return -E_NO_SYS;
