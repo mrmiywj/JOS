@@ -175,17 +175,17 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 	//panic("sys_page_alloc not implemented");
 	struct PageInfo* pg;
 	struct Env* e;
-	if ( va >= (void*) UTOP || ((uint32_t)va % PGSIZE != 0)){
+	if ( va >= (void*) UTOP || ((uintptr_t)va % PGSIZE != 0)){
 		return -E_INVAL;
 	}
 	if (envid2env(envid,&e,1) < 0)
 		return -E_BAD_ENV;
 	if ((perm & PTE_U) ==0 || (perm & PTE_P) == 0 )
 		return -E_INVAL;
-	if ((perm & (PTE_U | PTE_P | PTE_W | PTE_AVAIL)) > 0)
+	if ((perm & ~(PTE_U | PTE_P | PTE_W | PTE_AVAIL)) != 0)
 		return -E_INVAL;
 
-	if (page_alloc(&pg) < 0)
+	if ((pg = page_alloc(ALLOC_ZERO)) == NULL)
 		return -E_NO_MEM;
 
 	if (page_insert(e->env_pgdir,pg, va, perm) < 0){
@@ -227,7 +227,24 @@ sys_page_map(envid_t srcenvid, void *srcva,
 	//   check the current permissions on the page.
 
 	// LAB 4: Your code here.
-	panic("sys_page_map not implemented");
+	//panic("sys_page_map not implemented");
+	struct Env* srcenv;
+	struct Env* dstenv;
+	pte_t* pte;
+	struct PageInfo* pp;
+
+	if (envid2env(srcenvid,&srcenv,1) < 0|
+		envid2env(dstenvid,&dstenv,1) < 0){
+		return -E_BAD_ENV;
+	}
+	if ((uintptr_t)srcva >= UTOP || (uintptr_t)srcva % PGSIZE ||
+		(uintptr_t)dstva >= UTOP || (uintptr_t)dstva % PGSIZE){
+		return -E_INVAL;
+	}
+	if ((pp = page_lookup(srcenv->env_pgdir,srcva,&pte)) == NULL){
+		cprintf("page not found!\n");
+		return -E_INVAL;
+	}
 }
 
 // Unmap the page of memory at 'va' in the address space of 'envid'.
