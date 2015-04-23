@@ -233,7 +233,7 @@ sys_page_map(envid_t srcenvid, void *srcva,
 	pte_t* pte;
 	struct PageInfo* pp;
 
-	if (envid2env(srcenvid,&srcenv,1) < 0|
+	if (envid2env(srcenvid,&srcenv,1) < 0||
 		envid2env(dstenvid,&dstenv,1) < 0){
 		return -E_BAD_ENV;
 	}
@@ -245,6 +245,19 @@ sys_page_map(envid_t srcenvid, void *srcva,
 		cprintf("page not found!\n");
 		return -E_INVAL;
 	}
+	if ((perm & PTE_U) == 0 || (perm & PTE_P) == 0 || (perm & ~PTE_SYSCALL) != 0){
+		cprintf("sys_page_map: invalid perm\n");
+		return -E_INVAL;
+	}
+	if ((perm & PTE_W) && (*pte & PTE_W) == 0){
+		cprintf("sys_page_map: this page is not allowed to write!");
+		return -E_INVAL;
+	}
+
+	if (page_insert(dstenv->env_pgdir,pp,dstva,perm)){
+		return -E_NO_MEM;
+	}
+	return 0;
 }
 
 // Unmap the page of memory at 'va' in the address space of 'envid'.
@@ -260,7 +273,18 @@ sys_page_unmap(envid_t envid, void *va)
 	// Hint: This function is a wrapper around page_remove().
 
 	// LAB 4: Your code here.
-	panic("sys_page_unmap not implemented");
+	//panic("sys_page_unmap not implemented");
+	struct Env* e;
+	int ret = envid2env(envid, &e, 1);
+	if (ret != 0){
+		cprintf("sys_page_unmap:The env does not exist!");
+		return -E_BAD_ENV;
+	}
+	if ((uintptr_t) va >= UTOP || (uintptr_t) va % PGSIZE){
+		return -E_INVAL;
+	}
+	page_remove(e->env_pgdir,va);
+	return 0;
 }
 
 // Try to send 'value' to the target env 'envid'.
@@ -352,6 +376,17 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
         case SYS_yield:
         	sys_yield();
         	break;
+        //added in lab4
+        case SYS_page_alloc:
+        	return sys_page_alloc(a1,(void *)a2,a3);
+        case SYS_page_map:
+        	return sys_page_map(a1,(void *)a2,a3, (void *)a4,a5);
+        case SYS_page_unmap:
+        	return sys_page_unmap(a1,(void *)a2);
+        case SYS_exofork:
+        	return sys_exofork();
+        case SYS_env_set_status:
+        	return sys_env_set_status(a1,a2);
 
         default:
             return -E_NO_SYS;
