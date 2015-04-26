@@ -349,7 +349,7 @@ page_fault_handler(struct Trapframe *tf)
 	//   (the 'tf' variable points at 'curenv->env_tf').
 
 	// LAB 4: Your code here.
-    if (curenv->env_pgfault_upcall != 0){
+    if (curenv->env_pgfault_upcall){
     	user_mem_check(curenv,(void*)(UXSTACKTOP-4),4,0);
     	uintptr_t exstack;
     	struct UTrapframe* utf;
