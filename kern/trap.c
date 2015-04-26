@@ -357,7 +357,7 @@ page_fault_handler(struct Trapframe *tf)
     		utf = (struct UTrapframe*)(tf->tf_esp - sizeof(struct UTrapframe) - 4);
     	}
     	else{
-    		utf = (struct UTrapframe*)(tf->tf_esp - sizeof(struct UTrapframe));
+    		utf = (struct UTrapframe*)(UXSTACKTOP - sizeof(struct UTrapframe));
     	}
     	user_mem_assert(curenv,(void*)utf,sizeof(struct UTrapframe),PTE_U|PTE_W);
 
@@ -371,6 +371,7 @@ page_fault_handler(struct Trapframe *tf)
     	curenv->env_tf.tf_eip = (uint32_t) curenv->env_pgfault_upcall;
     	curenv->env_tf.tf_esp = (uint32_t) utf;
 
+    	env_run(curenv);
     }
 	// Destroy the environment that caused the fault.
 	cprintf("[%08x] user fault va %08x ip %08x\n",
