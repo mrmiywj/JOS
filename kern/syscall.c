@@ -182,30 +182,42 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 
 	// LAB 4: Your code here.
 	//panic("sys_page_alloc not implemented");
-	struct PageInfo* pg;
-	struct Env* e;
-	if ( va >= (void*) UTOP || ((uintptr_t)va % PGSIZE != 0)){
-		return -E_INVAL;
-	}
-	if (envid2env(envid,&e,1) < 0)
-		return -E_BAD_ENV;
-	if ((perm & PTE_U) ==0 || (perm & PTE_P) == 0 )
-		return -E_INVAL;
-	if ((perm & ~(PTE_U | PTE_P | PTE_W | PTE_AVAIL)) != 0)
-		return -E_INVAL;
 
-	if ((pg = page_alloc(ALLOC_ZERO)) == NULL)
-		return -E_NO_MEM;
+    struct Env *e;
+    struct PageInfo *pp;
 
-	if (page_insert(e->env_pgdir,pg, va, perm) < 0){
-		page_free(pg);
-		return -E_NO_MEM;
-	}
+    if(envid2env(envid, &e, 1) < 0)
+    {
+        return -E_BAD_ENV;
+    }
 
-	memset(page2kva(pg), 0 ,PGSIZE);
+    if((uintptr_t) va >= UTOP || (uintptr_t) va % PGSIZE)
+    {
+        return -E_INVAL;
+    }
 
-	return 0;
+    if((perm & PTE_U) == 0 || (perm & PTE_P) == 0)
+    {
+        return -E_INVAL;
+    }
 
+    if((perm & ~(PTE_U | PTE_P | PTE_W | PTE_AVAIL)) != 0)
+    {
+        return -E_NO_MEM;
+    }
+
+    if ((pp = page_alloc(ALLOC_ZERO)) == NULL)
+    {
+        return -E_NO_MEM;
+    }
+
+    if(page_insert(e->env_pgdir, pp, va, perm) < 0)
+    {
+        page_free(pp);
+        return -E_NO_MEM;
+    }
+
+    return 0;
 }
 
 // Map the page of memory at 'srcva' in srcenvid's address space
