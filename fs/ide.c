@@ -64,7 +64,6 @@ int
 ide_read(uint32_t secno, void *dst, size_t nsecs)
 {
 	int r;
-
 	assert(nsecs <= 256);
 
 	ide_wait_ready(0);

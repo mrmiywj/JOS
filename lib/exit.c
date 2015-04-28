@@ -4,7 +4,8 @@
 void
 exit(void)
 {
-	close_all();
+	//at start of lab5
+	//close_all();
 	sys_env_destroy(0);
 }
 
