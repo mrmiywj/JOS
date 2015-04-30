@@ -86,14 +86,26 @@ duppage(envid_t envid, unsigned pn)
     pte_t pte = uvpt[pn];
     int perm;
 
-    perm = PTE_U | PTE_P;
-    if(pte & PTE_W || pte & PTE_COW)
-    {
-        perm |= PTE_COW;
-    }
 
+    if (pte & PTE_SHARE){
+    	if ((r = sys_page_map(myenvid,
+    						 (void *)(pn * PGSIZE),
+    						 envid,
+    						 (void *) (pn * PGSIZE),
+    						 pte& PTE_SYSCALL)) < 0){
+    		return r;
+    	}
+    }
     // map to envid VA
-    if ((r = sys_page_map(myenvid,
+    else{
+        perm = PTE_U | PTE_P;
+        if(pte & PTE_W || pte & PTE_COW)
+        {
+            perm |= PTE_COW;
+        }
+
+    	if ((r = sys_page_map(myenvid,
+
                         (void *)(pn * PGSIZE),
                         envid,
                         (void *) (pn * PGSIZE),
@@ -116,7 +128,7 @@ duppage(envid_t envid, unsigned pn)
             return r;
         }
     }
-
+    }
 	return 0;
 }
 
