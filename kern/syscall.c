@@ -384,13 +384,10 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 		return -E_BAD_ENV;
 	}
 
-	target->env_ipc_from = curenv->env_id;
-	target->env_ipc_value = value;
+
 	if (target->env_ipc_recving == 0){
 		return -E_IPC_NOT_RECV;
 	}
-
-	target->env_ipc_recving = 0;
 	if ((uint32_t)srcva < UTOP ){
 		if ((uint32_t)srcva % PGSIZE != 0){
 			return -E_INVAL;
@@ -400,18 +397,33 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 			(perm & ~PTE_SYSCALL) != 0){
 			return -E_INVAL;
 		}
-		if ((page = page_lookup(curenv->env_pgdir,srcva,&pte)) == NULL){
+	}
+
+	if (target->env_ipc_recving == false){
+		return -E_IPC_NOT_RECV;
+	}
+
+	assert(target->env_status == ENV_NOT_RUNNABLE);
+
+	target->env_ipc_perm = 0;
+	void *dstva = target->env_ipc_dstva;
+	if (srcva < (void*)UTOP && perm != 0 && dstva < (void*) UTOP){
+		pte_t *sender_ptep = NULL;
+		struct PageInfo* pp = page_lookup(curenv->env_pgdir,srcva,&sender_ptep);
+		if (!pp || !(*sender_ptep & PTE_U) || !(*sender_ptep & PTE_P) || (!(*sender_ptep & PTE_W) && (perm & PTE_W))){
 			return -E_INVAL;
 		}
-		if ((perm & PTE_W) && ((*pte & PTE_W) ==0)){
-			return -E_INVAL;
-		}
-		if ((page_insert(target->env_pgdir,page,target->env_ipc_dstva,perm)) != 0){
+
+		//assert(!(uintptr_t) dstva % PGSIZE);
+		int r = page_insert(target->env_pgdir,pp ,(void*)dstva,perm);
+		if (r<0){
 			return -E_NO_MEM;
 		}
 		target->env_ipc_perm = perm;
 	}
-
+	target->env_ipc_from = curenv->env_id;
+	target->env_ipc_value = value;
+	target->env_ipc_recving = 0;
 	target->env_status = ENV_RUNNABLE;
 
 	return 0;
