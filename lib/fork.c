@@ -99,7 +99,7 @@ duppage(envid_t envid, unsigned pn)
     // map to envid VA
     else{
         perm = PTE_U | PTE_P;
-        if(pte & PTE_W || pte & PTE_COW)
+        if((pte & PTE_W) || (pte & PTE_COW))
         {
             perm |= PTE_COW;
         }

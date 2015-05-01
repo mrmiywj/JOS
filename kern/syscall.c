@@ -414,7 +414,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 			return -E_INVAL;
 		}
 
-		//assert(!(uintptr_t) dstva % PGSIZE);
+		assert((uintptr_t) dstva % PGSIZE == 0);
 		int r = page_insert(target->env_pgdir,pp ,(void*)dstva,perm);
 		if (r<0){
 			return -E_NO_MEM;
@@ -455,6 +455,7 @@ sys_ipc_recv(void *dstva)
 	}
 	curenv->env_tf.tf_regs.reg_eax = 0;
 	curenv->env_status = ENV_NOT_RUNNABLE;
+	sys_yield();
 
 	//panic("sys_ipc_recv not implemented");
 	return 0;
