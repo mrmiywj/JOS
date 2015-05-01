@@ -131,7 +131,7 @@ runit:
 			cprintf("EMPTY COMMAND\n");
 		return;
 	}
-
+	cprintf("I'm in runit!\n");
 	// Clean up command line.
 	// Read all commands from the filesystem: add an initial '/' to
 	// the command name.
@@ -151,10 +151,12 @@ runit:
 		cprintf("\n");
 	}
 
+	cprintf("I will spwan!\n");
 	// Spawn the command!
 	if ((r = spawn(argv[0], (const char**) argv)) < 0)
 		cprintf("spawn %s: %e\n", argv[0], r);
 
+	cprintf("spawn done!\n");
 	// In the parent, close all file descriptors and wait for the
 	// spawned command to exit.
 	close_all();
@@ -171,6 +173,7 @@ runit:
 	if (pipe_child) {
 		if (debug)
 			cprintf("[%08x] WAIT pipe_child %08x\n", thisenv->env_id, pipe_child);
+		cprintf("I will wait for child!\n");
 		wait(pipe_child);
 		if (debug)
 			cprintf("[%08x] wait finished\n", thisenv->env_id);

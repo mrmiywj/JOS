@@ -85,11 +85,15 @@ spawn(const char *prog, const char **argv)
 	//
 	//   - Start the child process running with sys_env_set_status().
 
-	if ((r = open(prog, O_RDONLY)) < 0)
+	cprintf("I will open !\n");
+	if ((r = open(prog, O_RDONLY)) < 0){
+		cprintf("open failed!\n");
 		return r;
+	}
 	fd = r;
 
 	// Read elf header
+	cprintf("I will open the ELF!\n");
 	elf = (struct Elf*) elf_buf;
 	if (readn(fd, elf_buf, sizeof(elf_buf)) != sizeof(elf_buf)
 	    || elf->e_magic != ELF_MAGIC) {
@@ -97,12 +101,12 @@ spawn(const char *prog, const char **argv)
 		cprintf("elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
 		return -E_NOT_EXEC;
 	}
-
+	cprintf("I will create a new environment!\n");
 	// Create new child environment
 	if ((r = sys_exofork()) < 0)
 		return r;
 	child = r;
-
+	cprintf("create a new child environment done!\n");
 	// Set up trap frame, including initial stack.
 	child_tf = envs[ENVX(child)].env_tf;
 	child_tf.tf_eip = elf->e_entry;
