@@ -145,19 +145,34 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 		if (user_mem_check(curenv, usd, sizeof(struct UserStabData), PTE_U) < 0)
 			return -1;
 
+		if (user_mem_check(curenv, usd, sizeof(struct UserStabData), PTE_U) < 0){
+			return -1;
+		}
+
 		stabs = usd->stabs;
 		stab_end = usd->stab_end;
 		stabstr = usd->stabstr;
 		stabstr_end = usd->stabstr_end;
 
+
 		// Make sure the STABS and string table memory is valid.
 		// LAB 3: Your code here.
+<<<<<<< HEAD
         if (user_mem_check(curenv , (void *)stabs , (uint32_t)stab_end - (uint32_t)stabs , PTE_U) < 0) {
             return -1;
         }
         if (user_mem_check(curenv , (void *) stabstr , (uint32_t)stabstr_end - (uint32_t)stabstr , PTE_U) < 0) {
             return -1;
         }
+=======
+		if (user_mem_check(curenv, stabs, stab_end - stabs - 1, PTE_U) < 0){
+			return -1;
+		}
+
+		if (user_mem_check(curenv, stabstr, stabstr_end - stabstr - 1, PTE_U) < 0){
+			return -1;
+		}
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 	}
 
 	// String table validity checks
@@ -212,10 +227,24 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	//	Look at the STABS documentation and <inc/stab.h> to find
 	//	which one.
 	// Your code here.
+<<<<<<< HEAD
 	stab_binsearch(stabs, &lline, &rline, N_SLINE, addr);
 	if(lline > rline)
 		return -1;
 	info->eip_line =  stabs[rline].n_desc;
+=======
+
+	// (N_SLINE)
+	stab_binsearch(stabs, &lline, &rline, N_SLINE, addr);
+
+	if (lline <= rline){
+		info->eip_line = stabs[lline].n_desc;
+	}
+	else{
+		return -1;
+	}
+
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 
 	// Search backwards from the line number for the relevant filename
 	// stab.

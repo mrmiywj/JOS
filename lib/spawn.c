@@ -157,11 +157,11 @@ spawnl(const char *prog, const char *arg0, ...)
 	// The contract of the function guarantees that the last
 	// argument will always be NULL, and that none of the other
 	// arguments will be NULL.
-	int argc=0;
+	int argc = 0;
 	va_list vl;
 	va_start(vl, arg0);
 	while(va_arg(vl, void *) != NULL)
-		argc++;
+		argc ++;
 	va_end(vl);
 
 	// Now that we have the size of the args, do a second pass
@@ -305,6 +305,7 @@ static int
 copy_shared_pages(envid_t child)
 {
 	// LAB 5: Your code here.
+<<<<<<< HEAD
 	int r = 0;
 	uint32_t i,j,pn;
 	for (i = PDX(UTEXT) ; i < PDX(UXSTACKTOP); i++){
@@ -325,6 +326,21 @@ copy_shared_pages(envid_t child)
 			}
 		}
 	}
+=======
+	void * va;
+	int perm, r;
+
+	for (va = (void *)0; va < (void *)UTOP; va += PGSIZE) {
+		if ((uvpd[PDX(va)] & PTE_P)
+			&& (perm = uvpt[PGNUM(va)] & PTE_SYSCALL) & PTE_P
+			&& perm & PTE_SHARE
+			&& (r = sys_page_map(0, va, child, va, perm)) < 0) {
+			cprintf("copy_shared_pages(): sys_page_map() failed: %e", r);
+			return r;
+		}
+	}
+
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 	return 0;
 }
 

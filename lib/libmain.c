@@ -8,12 +8,22 @@ extern void umain(int argc, char **argv);
 const volatile struct Env *thisenv;
 const char *binaryname = "<unknown>";
 
+struct Env *
+getThisenv()
+{
+	return (struct Env *)(envs + ENVX(sys_getenvid()));
+}
+
 void
 libmain(int argc, char **argv)
 {
 	// set thisenv to point at our Env structure in envs[].
 	// LAB 3: Your code here.
+<<<<<<< HEAD
 	thisenv = envs + ENVX(sys_getenvid());
+=======
+	thisenv = getThisenv();
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 
 	// save the name of the program so that panic() can use it
 	if (argc > 0)

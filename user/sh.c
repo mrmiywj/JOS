@@ -55,6 +55,7 @@ again:
 			// then close the original 'fd'.
 
 			// LAB 5: Your code here.
+<<<<<<< HEAD
 			fd = open(t,O_RDONLY);
 			if (fd < 0){
 				cprintf("syntax error: < not follow by word\n");
@@ -65,6 +66,19 @@ again:
 				close(fd);
 			}
 			//panic("< redirection not implemented");
+=======
+			// panic("< redirection not implemented");
+			if ((fd = open(t, O_RDONLY)) < 0) {
+				cprintf("open %s for read: %e", t, fd);
+				exit();
+			}
+
+			if (fd) {
+				dup(fd, 0);
+				close(fd);
+			}
+			
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 			break;
 
 		case '>':	// Output redirection

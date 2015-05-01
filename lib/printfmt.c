@@ -7,6 +7,7 @@
 #include <inc/string.h>
 #include <inc/stdarg.h>
 #include <inc/error.h>
+#include <inc/attributed.h>
 
 /*
  * Space or zero padding and a field width are supported for the numeric
@@ -101,8 +102,10 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 	while (1) {
 		while ((ch = *(unsigned char *) fmt++) != '%') {
-			if (ch == '\0')
+			if (ch == '\0'){
+				string_color = COLOR_WHITE;
 				return;
+			}
 			putch(ch, putdat);
 		}
 
@@ -177,6 +180,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 			break;
 
+<<<<<<< HEAD
         case 'C':
             switch(va_arg(ap, int))
             {
@@ -193,6 +197,13 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
             }
 
             goto reswitch;
+=======
+		// attributed string
+		case 'm':
+			num = getint(&ap, lflag);
+			string_color = num;
+			break;
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 
 		// error message
 		case 'e':
@@ -240,7 +251,15 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		// (unsigned) octal
 		case 'o':
 			// Replace this with your code.
+<<<<<<< HEAD
 			num = getuint(&ap,lflag);
+=======
+			//putch('X', putdat);
+			//putch('X', putdat);
+			//putch('X', putdat);
+			//break;
+			num = getuint(&ap, lflag);
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 			base = 8;
 			goto number;
 

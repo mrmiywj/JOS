@@ -51,6 +51,10 @@ i386_init(void)
 	// Acquire the big kernel lock before waking up APs
 	// Your code here:
 	lock_kernel();
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 	// Starting non-boot CPUs
 	boot_aps();
 
@@ -62,11 +66,17 @@ i386_init(void)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
 	// Touch all you want.
+<<<<<<< HEAD
 
 	ENV_CREATE(user_icode, ENV_TYPE_USER);
 
 	//ENV_CREATE(user_primes, ENV_TYPE_USER);
 
+=======
+	ENV_CREATE(user_yield, ENV_TYPE_USER);
+	ENV_CREATE(user_yield, ENV_TYPE_USER);
+	ENV_CREATE(user_yield, ENV_TYPE_USER);
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 #endif // TEST*
 
 	// Should not be necessary - drains keyboard because interrupt has given up.
@@ -128,8 +138,11 @@ mp_main(void)
 	// Your code here:
 	lock_kernel();
 	sched_yield();
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5827db0eea0f7099dbea0b0c3971a14244855197
 	// Remove this after you finish Exercise 4
-	for (;;);
 }
 
 /*
