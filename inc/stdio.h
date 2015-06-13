@@ -10,9 +10,9 @@
 /*
 ** EOF added
  */
-#define COLOR_RED 0x04
-#define COLOR_GRN 0x02
-#define COLOR_BLU 0x01
+//#define COLOR_RED 0x04
+//#define COLOR_GRN 0x02
+//#define COLOR_BLU 0x01
 
 // lib/stdio.c
 void	cputchar(int c);
